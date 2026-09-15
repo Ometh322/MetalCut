@@ -1,0 +1,5 @@
+# Единые переводы строк в репозитории
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
