@@ -1,6 +1,15 @@
 import Link from "next/link";
+import CartBadge from "@/components/cart/CartBadge";
+import { logoutAction } from "@/app/actions/auth";
+import type { SessionUser } from "@/lib/auth";
 
-export default function Header({ roots }: { roots: { slug: string; name: string }[] }) {
+export default function Header({
+  roots,
+  user,
+}: {
+  roots: { slug: string; name: string }[];
+  user: SessionUser | null;
+}) {
   return (
     <header className="bg-slate-900 text-white shadow-lg">
       <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-3">
@@ -21,14 +30,46 @@ export default function Header({ roots }: { roots: { slug: string; name: string 
           </button>
         </form>
 
-        <nav className="hidden lg:flex items-center gap-4 text-sm text-slate-300">
+        <div className="flex items-center gap-5 ml-auto">
+          <CartBadge />
+          {user ? (
+            <>
+              {user.role === "CUSTOMER" && (
+                <Link href="/account" className="text-sm text-slate-200 hover:text-white transition-colors">
+                  {user.name?.split(" ")[0] ?? "Кабинет"}
+                </Link>
+              )}
+              <form action={logoutAction}>
+                <button type="submit" className="text-sm text-slate-400 hover:text-white transition-colors">
+                  Выход
+                </button>
+              </form>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="text-sm text-slate-200 hover:text-white transition-colors">
+                Вход
+              </Link>
+              <Link
+                href="/register"
+                className="text-sm bg-slate-800 border border-slate-600 rounded-md px-3 py-1.5 hover:border-orange-500 transition-colors"
+              >
+                Регистрация
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
+
+      <nav className="border-t border-slate-800 hidden lg:block">
+        <div className="max-w-7xl mx-auto px-4 flex gap-6 text-sm text-slate-300 py-2">
           {roots.map((c) => (
             <Link key={c.slug} href={`/catalog/${c.slug}`} className="hover:text-white transition-colors">
               {c.name}
             </Link>
           ))}
-        </nav>
-      </div>
+        </div>
+      </nav>
     </header>
   );
 }

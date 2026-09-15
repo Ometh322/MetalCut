@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { AttributeDef } from "@/data/nomenclature";
 import type { ProductListItem } from "@/services/catalog.service";
 import { fmtPrice, keySpecs, plural } from "@/lib/format";
+import AddToCartButton from "@/components/cart/AddToCartButton";
 import { StockBadge, ToolPlaceholder } from "@/components/ui/Bits";
 
 export function ProductList({
@@ -64,6 +65,7 @@ export function ProductRow({ item, schema }: { item: ProductListItem; schema: At
           {item.offerCount} {plural(item.offerCount, ["предложение", "предложения", "предложений"])}
         </div>
         <StockBadge hasStock={item.hasStock} />
+        {item.bestOfferId && <AddToCartButton offerId={item.bestOfferId} small />}
       </div>
     </div>
   );
@@ -90,6 +92,11 @@ export function ProductCard({ item, schema }: { item: ProductListItem; schema: A
         </div>
         <StockBadge hasStock={item.hasStock} />
       </div>
+      {item.bestOfferId && (
+        <div className="pt-2">
+          <AddToCartButton offerId={item.bestOfferId} label="Купить" className="w-full" />
+        </div>
+      )}
     </div>
   );
 }

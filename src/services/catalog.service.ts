@@ -90,6 +90,7 @@ export interface ProductListItem {
   minPrice: number | null;
   offerCount: number;
   hasStock: boolean;
+  bestOfferId: string | null;
   categoryName: string;
   categorySlug: string;
 }
@@ -214,6 +215,7 @@ export async function getCategoryPage(opts: {
     SELECT p.id, p.slug, p.sku, p.name, p.brand, p.attributes,
            p."minPrice"::float8 AS "minPrice", p."offerCount",
            EXISTS (SELECT 1 FROM "Offer" o WHERE o."productId" = p.id AND o."isActive" AND o.stock > 0) AS "hasStock",
+           (SELECT o.id FROM "Offer" o WHERE o."productId" = p.id AND o."isActive" ORDER BY o.price ASC LIMIT 1) AS "bestOfferId",
            c.name AS "categoryName", c.slug AS "categorySlug"
     FROM "Product" p
     JOIN "Category" c ON c.id = p."categoryId"
@@ -405,7 +407,7 @@ export async function getHomeData() {
       where: { status: "APPROVED" },
       orderBy: { createdAt: "desc" },
       take: 8,
-      include: { category: true },
+      include: { category: true, offers: { where: { isActive: true }, orderBy: { price: "asc" }, take: 1 } },
     }),
   ]);
   return {
@@ -421,6 +423,8 @@ export async function getHomeData() {
       minPrice: p.minPrice ? p.minPrice.toNumber() : null,
       offerCount: p.offerCount,
       attributes: (p.attributes as Record<string, unknown> | null) ?? null,
+      bestOfferId: p.offers[0]?.id ?? null,
+      hasStock: p.offers[0] ? p.offers[0].stock > 0 : false,
       categoryName: p.category.name,
       categorySlug: p.category.slug,
       schema: (p.category.attributeSchema as unknown as AttributeDef[] | null) ?? [],

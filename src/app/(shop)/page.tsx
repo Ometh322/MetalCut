@@ -85,7 +85,8 @@ export default async function HomePage() {
                 attributes: p.attributes,
                 minPrice: p.minPrice,
                 offerCount: p.offerCount,
-                hasStock: p.minPrice !== null,
+                bestOfferId: p.bestOfferId,
+                hasStock: p.hasStock,
                 categoryName: p.categoryName,
                 categorySlug: p.categorySlug,
               }}

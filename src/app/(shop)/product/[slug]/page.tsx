@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import AddToCartButton from "@/components/cart/AddToCartButton";
 import { Breadcrumbs, StockBadge, ToolPlaceholder } from "@/components/ui/Bits";
 import { fmtPrice, formatAttrValue, plural } from "@/lib/format";
 import { getProductBySlug } from "@/services/catalog.service";
@@ -58,7 +59,7 @@ export default async function ProductPage({ params }: Props) {
           <h1 className="text-2xl font-bold text-slate-900 mt-1 leading-snug">{product.name}</h1>
 
           {best && (
-            <div className="mt-4 flex items-center gap-6">
+            <div className="mt-4 flex flex-wrap items-center gap-6">
               <div>
                 <div className="text-3xl font-bold text-orange-600">{fmtPrice(best.price)}</div>
                 {product.offers.length > 1 && (
@@ -71,6 +72,7 @@ export default async function ProductPage({ params }: Props) {
                 <StockBadge hasStock={best.stock > 0} />
                 <span className="text-xs text-slate-500">Продавец: {best.sellerBrand ?? best.sellerName}</span>
               </div>
+              <AddToCartButton offerId={best.id} label="В корзину" />
             </div>
           )}
 
@@ -108,6 +110,7 @@ export default async function ProductPage({ params }: Props) {
                 <th className="px-4 py-2 font-medium">Срок поставки</th>
                 <th className="px-4 py-2 font-medium">Мин. партия</th>
                 <th className="px-4 py-2 font-medium">Арт. продавца</th>
+                <th className="px-4 py-2 font-medium" />
               </tr>
             </thead>
             <tbody>
@@ -129,6 +132,7 @@ export default async function ProductPage({ params }: Props) {
                     {o.minOrderQty} {plural(o.minOrderQty, ["шт", "шт", "шт"])}
                   </td>
                   <td className="px-4 py-2.5 text-slate-500 text-xs">{o.sellerSku ?? "—"}</td>
+                  <td className="px-4 py-2.5"><AddToCartButton offerId={o.id} small /></td>
                 </tr>
               ))}
             </tbody>
