@@ -188,7 +188,7 @@ export const NOMENCLATURE: CategoryNode[] = [
             code: "flutes",
             label: "Число зубьев",
             type: "number",
-            values: [1, 2, 3, 4, 6],
+            values: [2, 4, 1, 3, 6],
             filter: "checkbox",
             isKey: true,
           },

@@ -373,13 +373,14 @@ async function main() {
       const category = catBySlug.get(catSlug);
       if (!node?.attributes || !category) continue;
 
-      const perCat = 5 + int(0, 6);
+      const perCat = 8 + int(0, 8);
       const seenCombos = new Set<string>();
 
       for (let k = 0; k < perCat; k++) {
         const attrs: Record<string, string | number | boolean> = {};
         for (const def of node.attributes) {
-          if (def.required || chance(0.82)) {
+          // обязательные и ключевые атрибуты заполняем всегда, остальные — с вероятностью
+          if (def.required || def.isKey || chance(0.82)) {
             const v = genValue(def, catSlug, attrs);
             if (v !== undefined) attrs[def.code] = v;
           }
