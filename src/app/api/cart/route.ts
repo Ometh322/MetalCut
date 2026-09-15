@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   }
 
   const offers = await prisma.offer.findMany({
-    where: { id: { in: ids }, isActive: true },
+    where: { id: { in: ids }, isActive: true, product: { status: "APPROVED" } },
     include: { product: { include: { category: true } }, seller: true },
     orderBy: { price: "asc" },
   });

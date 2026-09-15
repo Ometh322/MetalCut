@@ -6,6 +6,7 @@ import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { SignJWT, jwtVerify } from "jose";
+import type { Seller } from "@prisma/client";
 import { prisma } from "@/lib/db";
 
 const SECRET = new TextEncoder().encode(process.env.AUTH_SECRET || "dev-secret-metalcut");
@@ -74,5 +75,21 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
 export async function requireUser(next?: string): Promise<SessionUser> {
   const user = await getCurrentUser();
   if (!user) redirect(`/login${next ? `?next=${encodeURIComponent(next)}` : ""}`);
+  return user;
+}
+
+/** Guard кабинета продавца: пользователь с ролью SELLER/ADMIN и привязанным продавцом */
+export async function requireSeller(): Promise<{ user: SessionUser; seller: Seller }> {
+  const user = await requireUser("/seller");
+  if (user.role === "CUSTOMER") redirect("/");
+  const seller = await prisma.seller.findUnique({ where: { userId: user.id } });
+  if (!seller) redirect("/seller/register");
+  return { user, seller };
+}
+
+/** Guard админки */
+export async function requireAdmin(): Promise<SessionUser> {
+  const user = await requireUser("/admin/sellers");
+  if (user.role !== "ADMIN") redirect("/");
   return user;
 }

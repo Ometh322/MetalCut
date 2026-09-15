@@ -21,10 +21,12 @@ const registerSchema = z.object({
   password: z.string().min(6, "Пароль — минимум 6 символов"),
 });
 
-/** Куда отправлять пользователя после входа (кабинеты селлера/админа — будущие фазы) */
+/** Куда отправлять пользователя после входа по роли */
 function homeByRole(role: string, next?: string): string {
   if (next?.startsWith("/")) return next;
   if (role === "CUSTOMER") return "/account";
+  if (role === "SELLER") return "/seller";
+  if (role === "ADMIN") return "/admin/sellers";
   return "/";
 }
 

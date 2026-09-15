@@ -39,6 +39,16 @@ export default function Header({
                   {user.name?.split(" ")[0] ?? "Кабинет"}
                 </Link>
               )}
+              {user.role === "SELLER" && (
+                <Link href="/seller" className="text-sm text-slate-200 hover:text-white transition-colors">
+                  Кабинет продавца
+                </Link>
+              )}
+              {user.role === "ADMIN" && (
+                <Link href="/admin/sellers" className="text-sm text-slate-200 hover:text-white transition-colors">
+                  Админка
+                </Link>
+              )}
               <form action={logoutAction}>
                 <button type="submit" className="text-sm text-slate-400 hover:text-white transition-colors">
                   Выход
