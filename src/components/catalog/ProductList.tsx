@@ -61,6 +61,7 @@ export function ProductRow({ item, schema }: { item: ProductListItem; schema: At
       </div>
       <div className="shrink-0 w-48 flex flex-col items-end gap-1 text-right">
         <div className="text-lg font-semibold text-orange-600">{fmtPrice(item.minPrice)}</div>
+        <div className="text-[11px] text-slate-400">с НДС, за шт</div>
         <div className="text-xs text-slate-500">
           {item.offerCount} {plural(item.offerCount, ["предложение", "предложения", "предложений"])}
         </div>
@@ -88,7 +89,7 @@ export function ProductCard({ item, schema }: { item: ProductListItem; schema: A
       <div className="mt-auto pt-2 flex items-end justify-between gap-2">
         <div>
           <div className="font-semibold text-orange-600">{fmtPrice(item.minPrice)}</div>
-          <div className="text-[11px] text-slate-400">Арт. {item.sku}</div>
+          <div className="text-[11px] text-slate-400">с НДС · Арт. {item.sku}</div>
         </div>
         <StockBadge hasStock={item.hasStock} />
       </div>

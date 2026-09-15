@@ -5,8 +5,9 @@
  */
 import type { AttributeDef } from "@/data/nomenclature";
 
-export type SortKey = "popular" | "price_asc" | "price_desc" | "new" | "name";
+export type SortKey = "popular" | "price_asc" | "price_desc" | "new" | "name" | "sku";
 export type ViewMode = "list" | "grid";
+export type Availability = "in_stock" | "on_order";
 
 export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: "popular", label: "Популярные" },
@@ -14,9 +15,11 @@ export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: "price_desc", label: "Сначала дорогие" },
   { key: "new", label: "Новинки" },
   { key: "name", label: "По названию" },
+  { key: "sku", label: "По артикулу" },
 ];
 
 export const PER_PAGE = 20;
+export const PER_PAGE_OPTIONS = [20, 40, 60];
 
 export interface AttrFilterState {
   /** Выбранные значения (enum или дискретные числа — всегда строки для URL/SQL) */
@@ -30,14 +33,16 @@ export interface FilterState {
   brands: string[];
   priceMin?: number;
   priceMax?: number;
+  availability?: Availability;
   attrs: Record<string, AttrFilterState>;
   sort: SortKey;
   page: number;
+  perPage: number;
   view: ViewMode;
 }
 
 export function defaultFilterState(): FilterState {
-  return { q: "", brands: [], attrs: {}, sort: "popular", page: 1, view: "list" };
+  return { q: "", brands: [], attrs: {}, sort: "popular", page: 1, perPage: PER_PAGE, view: "list" };
 }
 
 const num = (v: string | null | undefined): number | undefined => {
@@ -68,6 +73,10 @@ export function parseFilters(sp: URLSearchParams, schema: AttributeDef[]): Filte
   const page = parseInt(sp.get("page") ?? "1", 10);
   st.page = Number.isFinite(page) && page > 0 ? page : 1;
   st.view = sp.get("view") === "grid" ? "grid" : "list";
+  const perPage = parseInt(sp.get("per_page") ?? "", 10);
+  if (PER_PAGE_OPTIONS.includes(perPage)) st.perPage = perPage;
+  const avail = sp.get("availability");
+  if (avail === "in_stock" || avail === "on_order") st.availability = avail;
 
   for (const def of schema) {
     if (def.filter === "checkbox") {
@@ -98,6 +107,8 @@ export function toSearchParams(st: FilterState): URLSearchParams {
   if (st.sort !== "popular") p.set("sort", st.sort);
   if (st.page > 1) p.set("page", String(st.page));
   if (st.view === "grid") p.set("view", "grid");
+  if (st.perPage !== PER_PAGE) p.set("per_page", String(st.perPage));
+  if (st.availability) p.set("availability", st.availability);
   return p;
 }
 
@@ -164,12 +175,28 @@ export function withQ(st: FilterState, q: string): FilterState {
   return resetPage({ ...st, q: q.trim() });
 }
 
+/** Наличие — взаимоисключающие значения, повторный клик снимает */
+export function withAvailability(st: FilterState, value: Availability): FilterState {
+  const availability = st.availability === value ? undefined : value;
+  return resetPage({ ...st, availability });
+}
+
+export function withPerPage(st: FilterState, perPage: number): FilterState {
+  return resetPage({ ...st, perPage });
+}
+
+export const AVAILABILITY_LABELS: Record<Availability, string> = {
+  in_stock: "В наличии",
+  on_order: "Под заказ",
+};
+
 export function hasActiveFilters(st: FilterState): boolean {
   return Boolean(
     st.brands.length ||
       Object.values(st.attrs).some((f) => (f.values?.length ?? 0) > 0 || f.min !== undefined || f.max !== undefined) ||
       st.priceMin !== undefined ||
-      st.priceMax !== undefined,
+      st.priceMax !== undefined ||
+      st.availability !== undefined,
   );
 }
 

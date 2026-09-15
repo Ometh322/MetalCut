@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import type { FilterState, SortKey, ViewMode } from "@/lib/catalog-url";
-import { SORT_OPTIONS, toSearchParams, withSort, withView } from "@/lib/catalog-url";
+import { PER_PAGE_OPTIONS, SORT_OPTIONS, toSearchParams, withPerPage, withSort, withView } from "@/lib/catalog-url";
 import { plural } from "@/lib/format";
 
 export default function Toolbar({ basePath, state, total }: { basePath: string; state: FilterState; total: number }) {
@@ -18,6 +18,20 @@ export default function Toolbar({ basePath, state, total }: { basePath: string; 
         Найдено: <b>{total}</b> {plural(total, ["товар", "товара", "товаров"])}
       </span>
       <div className="flex items-center gap-2">
+        <label className="flex items-center gap-1.5 text-sm text-slate-600">
+          Показывать по
+          <select
+            value={state.perPage}
+            onChange={(e) => go(withPerPage(state, Number(e.target.value)))}
+            className="border border-slate-300 rounded-md px-2 py-1.5 bg-white cursor-pointer"
+          >
+            {PER_PAGE_OPTIONS.map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </label>
         <select
           value={state.sort}
           onChange={(e) => go(withSort(state, e.target.value as SortKey))}

@@ -3,13 +3,15 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { AttributeDef } from "@/data/nomenclature";
-import type { FilterState } from "@/lib/catalog-url";
+import type { Availability, FilterState } from "@/lib/catalog-url";
 import {
+  AVAILABILITY_LABELS,
   clearFilters,
   hasActiveFilters,
   toSearchParams,
   withAttrRange,
   withAttrValue,
+  withAvailability,
   withBrand,
   withPrice,
 } from "@/lib/catalog-url";
@@ -21,9 +23,10 @@ interface Props {
   attrFacets: AttrFacetData[];
   brands: FacetCount[];
   priceBounds: { min: number; max: number };
+  availability: { in_stock: number; on_order: number };
 }
 
-export default function FiltersSidebar({ basePath, state, attrFacets, brands, priceBounds }: Props) {
+export default function FiltersSidebar({ basePath, state, attrFacets, brands, priceBounds, availability }: Props) {
   const router = useRouter();
   const go = (next: FilterState) => {
     const qs = toSearchParams(next).toString();
@@ -65,6 +68,23 @@ export default function FiltersSidebar({ basePath, state, attrFacets, brands, pr
           />
         </Group>
       )}
+
+      <Group title="Наличие" defaultOpen>
+        <div className="space-y-0.5">
+          {(Object.keys(AVAILABILITY_LABELS) as Availability[]).map((key) => (
+            <label key={key} className="flex items-center gap-2 py-0.5 cursor-pointer text-slate-700 hover:text-slate-900">
+              <input
+                type="checkbox"
+                checked={state.availability === key}
+                onChange={() => go(withAvailability(state, key))}
+                className="accent-orange-600 w-4 h-4"
+              />
+              <span className="text-sm flex-1">{AVAILABILITY_LABELS[key]}</span>
+              <span className="text-xs text-slate-400">{availability[key]}</span>
+            </label>
+          ))}
+        </div>
+      </Group>
 
       {filterableAttrs.map((f, i) => (
         <Group key={f.def.code} title={f.def.label + (f.def.unit ? `, ${f.def.unit}` : "")} defaultOpen={i < 3}>

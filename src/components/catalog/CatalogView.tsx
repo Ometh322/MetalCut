@@ -1,6 +1,5 @@
 import type { AttributeDef } from "@/data/nomenclature";
 import type { FilterState } from "@/lib/catalog-url";
-import { PER_PAGE } from "@/lib/catalog-url";
 import type { CategoryPageData } from "@/services/catalog.service";
 import ActiveChips from "@/components/catalog/ActiveChips";
 import FiltersSidebar from "@/components/catalog/FiltersSidebar";
@@ -34,6 +33,7 @@ export default function CatalogView({
           attrFacets={data.facets.attrs}
           brands={data.facets.brands}
           priceBounds={data.facets.price}
+          availability={data.facets.availability}
         />
       </aside>
 
@@ -54,7 +54,7 @@ export default function CatalogView({
           </div>
         )}
 
-        <Pagination basePath={basePath} state={state} total={data.total} perPage={PER_PAGE} />
+        <Pagination basePath={basePath} state={state} total={data.total} perPage={state.perPage} />
       </section>
     </div>
   );

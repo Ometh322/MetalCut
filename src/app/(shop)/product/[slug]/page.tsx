@@ -62,6 +62,7 @@ export default async function ProductPage({ params }: Props) {
             <div className="mt-4 flex flex-wrap items-center gap-6">
               <div>
                 <div className="text-3xl font-bold text-orange-600">{fmtPrice(best.price)}</div>
+                <div className="text-xs text-slate-500">с НДС, за {product.unit}</div>
                 {product.offers.length > 1 && (
                   <div className="text-sm text-slate-500">
                     от {product.offers.length} {plural(product.offers.length, ["продавца", "продавцов", "продавцов"])}

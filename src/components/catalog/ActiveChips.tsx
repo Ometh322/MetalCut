@@ -1,6 +1,16 @@
 import Link from "next/link";
 import type { FilterState } from "@/lib/catalog-url";
-import { catalogHref, clearFilters, withAttrRange, withAttrValue, withBrand, withPrice, withQ } from "@/lib/catalog-url";
+import {
+  AVAILABILITY_LABELS,
+  catalogHref,
+  clearFilters,
+  withAttrRange,
+  withAttrValue,
+  withAvailability,
+  withBrand,
+  withPrice,
+  withQ,
+} from "@/lib/catalog-url";
 import type { AttrFacetData } from "@/services/catalog.service";
 
 /** Чипсы применённых фильтров над списком (каждый — ссылка, снимающая фильтр) */
@@ -16,6 +26,13 @@ export default function ActiveChips({
   const chips: { label: string; href: string }[] = [];
 
   if (state.q) chips.push({ label: `Поиск: «${state.q}»`, href: catalogHref(withQ(state, ""), basePath) });
+
+  if (state.availability) {
+    chips.push({
+      label: AVAILABILITY_LABELS[state.availability],
+      href: catalogHref(withAvailability(state, state.availability), basePath),
+    });
+  }
 
   if (state.priceMin !== undefined || state.priceMax !== undefined) {
     const from = state.priceMin !== undefined ? state.priceMin : "…";

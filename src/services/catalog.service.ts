@@ -110,6 +110,7 @@ export interface FacetsData {
   attrs: AttrFacetData[];
   brands: FacetCount[];
   price: { min: number; max: number };
+  availability: { in_stock: number; on_order: number };
 }
 
 export interface CategoryPageData {
@@ -124,7 +125,10 @@ const SORT_SQL: Record<SortKey, Prisma.Sql> = {
   price_desc: Prisma.sql`p."minPrice" DESC NULLS LAST`,
   new: Prisma.sql`p."createdAt" DESC`,
   name: Prisma.sql`p."name" ASC`,
+  sku: Prisma.sql`p."sku" ASC`,
 };
+
+const HAS_STOCK_SQL = Prisma.sql`EXISTS (SELECT 1 FROM "Offer" o WHERE o."productId" = p.id AND o."isActive" AND o.stock > 0)`;
 
 function textSearchCond(q: string): Prisma.Sql {
   const like = `%${q}%`;
@@ -168,10 +172,17 @@ function priceConds(st: FilterState): Prisma.Sql[] {
   return conds;
 }
 
+function availabilityConds(st: FilterState): Prisma.Sql[] {
+  if (st.availability === "in_stock") return [HAS_STOCK_SQL];
+  if (st.availability === "on_order") return [Prisma.sql`NOT ${HAS_STOCK_SQL}`];
+  return [];
+}
+
 interface FacetRow {
   attributes: Record<string, unknown> | null;
   brand: string | null;
   minPrice: number | null;
+  hasStock: boolean;
 }
 
 /** Проверка строки базовой выборки на соответствие фильтрам атрибутов (для фасетов) */
@@ -200,13 +211,14 @@ export async function getCategoryPage(opts: {
   state: FilterState;
 }): Promise<CategoryPageData> {
   const { categoryIds, schema, state } = opts;
-  const perPage = 20;
+  const perPage = state.perPage;
 
   const where = [
     ...baseConds(categoryIds, state.q),
     ...attrConds(schema, state.attrs),
     ...brandConds(state.brands),
     ...priceConds(state),
+    ...availabilityConds(state),
   ];
   const whereSql = Prisma.join(where, " AND ");
 
@@ -231,7 +243,7 @@ export async function getCategoryPage(opts: {
 
   // Базовая выборка для фасетов: без фасетных фильтров (только статус + категория + поиск)
   const facetRows = await prisma.$queryRaw<FacetRow[]>(Prisma.sql`
-    SELECT p.attributes, p.brand, p."minPrice"::float8 AS "minPrice"
+    SELECT p.attributes, p.brand, p."minPrice"::float8 AS "minPrice", ${HAS_STOCK_SQL} AS "hasStock"
     FROM "Product" p
     WHERE ${Prisma.join(baseConds(categoryIds, state.q), " AND ")}
   `);
@@ -301,7 +313,16 @@ export async function getCategoryPage(opts: {
     ? { min: Math.floor(Math.min(...prices)), max: Math.ceil(Math.max(...prices)) }
     : { min: 0, max: 0 };
 
-  return { items, total, facets: { attrs: attrsFacets, brands, price: priceFacet } };
+  // Наличие: считаем без собственного фильтра доступности
+  const availBase = facetRows.filter(
+    (r) => rowMatchesAttrs(r, schema, state.attrs) && matchesBrand(r) && matchesPrice(r),
+  );
+  const availabilityFacet = {
+    in_stock: availBase.filter((r) => r.hasStock).length,
+    on_order: availBase.filter((r) => !r.hasStock).length,
+  };
+
+  return { items, total, facets: { attrs: attrsFacets, brands, price: priceFacet, availability: availabilityFacet } };
 }
 
 // ---------------------------------------------------------------------------
