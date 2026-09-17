@@ -21,7 +21,7 @@ export default function Header({
           <input
             type="search"
             name="q"
-            placeholder="Фреза концевая 10 мм, метчик M8, артикул…"
+            placeholder="Опишите задачу: фреза 10 мм по нержавейке…"
             className="w-full rounded-l-md px-4 py-2 text-sm text-slate-900 bg-white outline-none"
             aria-label="Поиск по каталогу"
           />

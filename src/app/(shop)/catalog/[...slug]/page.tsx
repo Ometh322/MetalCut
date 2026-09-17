@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { AttributeDef } from "@/data/nomenclature";
+import AiBanner from "@/components/catalog/AiBanner";
 import CatalogView from "@/components/catalog/CatalogView";
 import { Breadcrumbs } from "@/components/ui/Bits";
 import { parseFilters, spToUrlSearchParams } from "@/lib/catalog-url";
-import { plural } from "@/lib/format";
+import { formatAttrValue, plural } from "@/lib/format";
 import { getCategoryPage, getCategoryTree, resolveCategoryChain, subtreeIds, type CategoryTreeNode } from "@/services/catalog.service";
 
 export const dynamic = "force-dynamic";
@@ -39,6 +40,19 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   const basePath = `/catalog/${[...ancestors.map((a) => a.slug), category.slug].join("/")}`;
 
+  // Чипсы AI-подбора — что понял разбор (совпадает с применёнными фильтрами)
+  const aiQuery = spToUrlSearchParams(sp).get("ai");
+  const aiChips = [category.name];
+  for (const f of data.facets.attrs) {
+    const af = state.attrs[f.def.code];
+    if (!af) continue;
+    for (const v of af.values ?? []) aiChips.push(`${f.def.label}: ${formatAttrValue(f.def, v)}`);
+    if (af.min !== undefined || af.max !== undefined) {
+      const unit = f.def.unit ? ` ${f.def.unit}` : "";
+      aiChips.push(`${f.def.label}: ${af.min ?? "…"}–${af.max ?? "…"}${unit}`);
+    }
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 mt-4">
       <Breadcrumbs
@@ -49,6 +63,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           { label: category.name },
         ]}
       />
+
+      {aiQuery && <AiBanner originalQuery={aiQuery} chips={aiChips} basePath={basePath} />}
       <div className="mt-2 mb-4 flex flex-wrap items-baseline gap-3">
         <h1 className="text-2xl font-bold text-slate-900">{category.name}</h1>
         <span className="text-sm text-slate-500">

@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/cart/AddToCartButton";
+import { ProductCard } from "@/components/catalog/ProductList";
 import { Breadcrumbs, StockBadge, ToolPlaceholder } from "@/components/ui/Bits";
 import { fmtPrice, formatAttrValue, plural } from "@/lib/format";
-import { getProductBySlug } from "@/services/catalog.service";
+import { getProductBySlug, getSimilarProducts } from "@/services/catalog.service";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,7 @@ export default async function ProductPage({ params }: Props) {
   const categoryPath = product.ancestors.length
     ? `/catalog/${product.ancestors.map((a) => a.slug).join("/")}/${product.categorySlug}`
     : `/catalog/${product.categorySlug}`;
+  const similar = await getSimilarProducts(product.id, product.categoryId, product.attributes, product.schema);
   const attrEntries = product.schema
     .map((def) => ({ def, value: product.attributes?.[def.code] }))
     .filter((e) => e.value !== undefined && e.value !== null && e.value !== "");
@@ -138,6 +140,18 @@ export default async function ProductPage({ params }: Props) {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Похожие / альтернативные (атрибутные дистанции) */}
+      {similar.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-slate-900 mb-3">Похожие и альтернативные</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+            {similar.map((s) => (
+              <ProductCard key={s.id} item={s} schema={product.schema} />
+            ))}
+          </div>
         </div>
       )}
 

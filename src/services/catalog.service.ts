@@ -338,6 +338,7 @@ export interface ProductWithOffers {
   description: string | null;
   attributes: Record<string, unknown> | null;
   unit: string;
+  categoryId: string;
   categoryName: string;
   categorySlug: string;
   ancestors: Category[];
@@ -382,6 +383,7 @@ export async function getProductBySlug(slug: string): Promise<ProductWithOffers 
     description: product.description,
     attributes: (product.attributes as Record<string, unknown> | null) ?? null,
     unit: product.unit,
+    categoryId: product.categoryId,
     categoryName: product.category.name,
     categorySlug: product.category.slug,
     ancestors,
@@ -413,6 +415,87 @@ export async function getAncestors(category: Category): Promise<Category[]> {
     cur = parent;
   }
   return ancestors;
+}
+
+/** Категория по slug с полным путём (для AI-редиректа из глобального поиска) */
+export async function getCategoryPathBySlug(slug: string) {
+  const category = await prisma.category.findFirst({ where: { slug, isActive: true } });
+  if (!category) return null;
+  return { category, ancestors: await getAncestors(category) };
+}
+
+// ---------------------------------------------------------------------------
+// Похожие товары (атрибутные дистанции, без ML)
+// ---------------------------------------------------------------------------
+
+/** Веса совпадения ключевых атрибутов в расчёте «похожести» */
+const SIMILARITY_WEIGHTS: Record<string, number> = {
+  material: 3,
+  workpiece: 3,
+  flutes: 2,
+  shank: 1,
+  tip: 1,
+  coating: 1,
+  thread_nominal: 3,
+  tool_kind: 2,
+  shape: 2,
+  holder_section: 2,
+  er_size: 2,
+  taper: 2,
+  disc_kind: 2,
+};
+
+export async function getSimilarProducts(
+  productId: string,
+  categoryId: string,
+  attributes: Record<string, unknown> | null,
+  schema: AttributeDef[],
+  limit = 6,
+): Promise<ProductListItem[]> {
+  const rows = await prisma.$queryRaw<ProductListItem[]>(Prisma.sql`
+    SELECT p.id, p.slug, p.sku, p.name, p.brand, p.attributes,
+           p."minPrice"::float8 AS "minPrice", p."offerCount",
+           EXISTS (SELECT 1 FROM "Offer" o WHERE o."productId" = p.id AND o."isActive" AND o.stock > 0) AS "hasStock",
+           (SELECT o.id FROM "Offer" o WHERE o."productId" = p.id AND o."isActive" ORDER BY o.price ASC LIMIT 1) AS "bestOfferId",
+           c.name AS "categoryName", c.slug AS "categorySlug"
+    FROM "Product" p
+    JOIN "Category" c ON c.id = p."categoryId"
+    WHERE p."status" = 'APPROVED' AND p."categoryId" = ${categoryId} AND p.id <> ${productId}
+    LIMIT 200
+  `);
+  if (!rows.length) return [];
+
+  const scoreOf = (row: ProductListItem): number => {
+    let score = 0;
+    const other = row.attributes ?? {};
+    for (const def of schema) {
+      if (def.code === "diameter") {
+        // диаметр — числовая дистанция: полвес за ±25%, полный за совпадение
+        const a = Number(attributes?.diameter);
+        const b = Number(other.diameter);
+        if (Number.isFinite(a) && Number.isFinite(b) && a > 0) {
+          const rel = Math.abs(a - b) / a;
+          if (rel <= 0.001) score += 4;
+          else if (rel <= 0.25) score += 2;
+          else if (rel <= 0.5) score += 1;
+        }
+        continue;
+      }
+      const w = SIMILARITY_WEIGHTS[def.code];
+      if (!w) continue;
+      const a = attributes?.[def.code];
+      const b = other[def.code];
+      if (a !== undefined && a !== null && b !== undefined && b !== null && String(a) === String(b)) score += w;
+    }
+    return score;
+  };
+
+  return rows
+    .map((r) => ({ r, s: scoreOf(r) }))
+    .filter((x) => x.s >= 3)
+    .sort((a, b) => b.s - a.s)
+    .slice(0, limit)
+    .map((x) => x.r);
 }
 
 // ---------------------------------------------------------------------------

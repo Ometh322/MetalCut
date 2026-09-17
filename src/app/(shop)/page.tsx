@@ -27,6 +27,7 @@ export default async function HomePage() {
             className="w-full rounded-l-lg px-4 py-3 text-slate-900 outline-none"
             aria-label="Поиск по каталогу"
           />
+          <span className="sr-only">AI-подбор поймёт характеристики из описания</span>
           <button type="submit" className="bg-orange-600 hover:bg-orange-500 transition-colors rounded-r-lg px-6 font-medium">
             Найти
           </button>
