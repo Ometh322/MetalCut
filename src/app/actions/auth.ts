@@ -26,7 +26,7 @@ function homeByRole(role: string, next?: string): string {
   if (next?.startsWith("/")) return next;
   if (role === "CUSTOMER") return "/account";
   if (role === "SELLER") return "/seller";
-  if (role === "ADMIN") return "/admin/sellers";
+  if (role === "ADMIN") return "/admin";
   return "/";
 }
 

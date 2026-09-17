@@ -45,7 +45,7 @@ export default function Header({
                 </Link>
               )}
               {user.role === "ADMIN" && (
-                <Link href="/admin/sellers" className="text-sm text-slate-200 hover:text-white transition-colors">
+                <Link href="/admin" className="text-sm text-slate-200 hover:text-white transition-colors">
                   Админка
                 </Link>
               )}

@@ -89,7 +89,7 @@ export async function requireSeller(): Promise<{ user: SessionUser; seller: Sell
 
 /** Guard админки */
 export async function requireAdmin(): Promise<SessionUser> {
-  const user = await requireUser("/admin/sellers");
+  const user = await requireUser("/admin");
   if (user.role !== "ADMIN") redirect("/");
   return user;
 }
