@@ -4,15 +4,7 @@ import Link from "next/link";
  * Баннер AI-подбора на странице категории: показывает, что понял разбор запроса
  * (текущие применённые фильтры), и даёт уйти в обычный текстовый поиск.
  */
-export default function AiBanner({
-  originalQuery,
-  chips,
-  basePath,
-}: {
-  originalQuery: string;
-  chips: string[];
-  basePath: string;
-}) {
+export default function AiBanner({ originalQuery, chips }: { originalQuery: string; chips: string[] }) {
   return (
     <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-lg px-4 py-3 mb-4 flex flex-wrap items-center gap-x-4 gap-y-2">
       <span className="inline-flex items-center gap-2 text-sm font-medium">

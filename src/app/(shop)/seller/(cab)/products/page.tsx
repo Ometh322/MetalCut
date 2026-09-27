@@ -7,7 +7,7 @@ import type { ProductStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Мои товары — MetalCut" };
+export const metadata = { title: "Мои товары" };
 
 const TABS: { key: string; label: string }[] = [
   { key: "", label: "Все" },

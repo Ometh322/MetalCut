@@ -8,7 +8,7 @@ import type { AttributeDef } from "@/data/nomenclature";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Категория — MetalCut" };
+export const metadata = { title: "Категория" };
 
 export default async function AdminCategoryEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

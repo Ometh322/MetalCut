@@ -4,7 +4,7 @@ import { sellerStatusAction } from "@/app/actions/admin";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Продавцы — админка MetalCut" };
+export const metadata = { title: "Продавцы" };
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   PENDING: { label: "На модерации", cls: "bg-amber-50 text-amber-700 border-amber-200" },

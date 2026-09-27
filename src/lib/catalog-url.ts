@@ -127,9 +127,11 @@ export function withAttrValue(st: FilterState, code: string, value: string): Fil
   const cur = st.attrs[code]?.values ?? [];
   const values = cur.includes(value) ? cur.filter((v) => v !== value) : [...cur, value];
   const attrs = { ...st.attrs };
-  if (values.length) attrs[code] = { ...attrs[code], values };
-  else if (attrs[code]) {
-    const { values: _drop, ...rest } = attrs[code];
+  if (values.length) {
+    attrs[code] = { ...attrs[code], values };
+  } else if (attrs[code]) {
+    const rest = { ...attrs[code] };
+    delete rest.values;
     if (rest.min !== undefined || rest.max !== undefined) attrs[code] = rest;
     else delete attrs[code];
   }
@@ -137,11 +139,12 @@ export function withAttrValue(st: FilterState, code: string, value: string): Fil
 }
 
 export function withAttrRange(st: FilterState, code: string, min: number | undefined, max: number | undefined): FilterState {
+  const attrs = { ...st.attrs };
   if (min === undefined && max === undefined) {
-    const { [code]: _drop, ...attrs } = st.attrs;
+    delete attrs[code];
     return resetPage({ ...st, attrs });
   }
-  const attrs = { ...st.attrs, [code]: { ...st.attrs[code], values: undefined, min, max } };
+  attrs[code] = { min, max };
   return resetPage({ ...st, attrs });
 }
 

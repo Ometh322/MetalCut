@@ -4,7 +4,7 @@ import { plural } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Пользователи — MetalCut" };
+export const metadata = { title: "Пользователи" };
 
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Администратор",

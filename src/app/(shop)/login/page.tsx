@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Вход — MetalCut" };
+export const metadata = { title: "Вход" };
 
 export default async function LoginPage({
   searchParams,

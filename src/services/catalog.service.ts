@@ -6,7 +6,7 @@
  * считаются по базовой выборке категории в JS (объёмы демо это позволяют;
  * при росте — на Meilisearch за тем же интерфейсом страницы).
  */
-import { Prisma, type Category, type Seller } from "@prisma/client";
+import { Prisma, type Category } from "@prisma/client";
 import type { AttributeDef } from "@/data/nomenclature";
 import { prisma } from "@/lib/db";
 import type { AttrFilterState, FilterState, SortKey } from "@/lib/catalog-url";
@@ -43,7 +43,6 @@ export async function resolveCategoryChain(
   const ancestors: Category[] = [];
   let cur: Category | null = leaf;
   while (cur?.parentId) {
-    // eslint-disable-next-line no-await-in-loop
     const parent: Category | null = await prisma.category.findUnique({ where: { id: cur.parentId } });
     if (!parent) break;
     ancestors.unshift(parent);
@@ -408,7 +407,6 @@ export async function getAncestors(category: Category): Promise<Category[]> {
   const ancestors: Category[] = [];
   let cur: Category | null = category;
   while (cur?.parentId) {
-    // eslint-disable-next-line no-await-in-loop
     const parent: Category | null = await prisma.category.findUnique({ where: { id: cur.parentId } });
     if (!parent) break;
     ancestors.unshift(parent);

@@ -3,7 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Заявка отправлена — MetalCut" };
+export const metadata = { title: "Заявка отправлена" };
 
 export default async function CheckoutSuccessPage({
   searchParams,

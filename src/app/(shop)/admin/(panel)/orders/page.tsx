@@ -1,4 +1,4 @@
-import Link from "next/link";
+
 import { orderStatusAction } from "@/app/actions/admin";
 import { prisma } from "@/lib/db";
 import { fmtPrice, plural } from "@/lib/format";
@@ -6,7 +6,7 @@ import { ORDER_STATUS } from "@/lib/statuses";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Заказы — MetalCut" };
+export const metadata = { title: "Заказы" };
 
 export default async function AdminOrdersPage() {
   const orders = await prisma.order.findMany({

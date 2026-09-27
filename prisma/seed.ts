@@ -325,7 +325,7 @@ async function main() {
 
   // Пользователи
   console.log("Пользователи…");
-  const admin = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: "admin@demo.ru" },
     create: { email: "admin@demo.ru", passwordHash: hashPassword("admin123"), name: "Администратор платформы", role: "ADMIN" },
     update: { passwordHash: hashPassword("admin123") },

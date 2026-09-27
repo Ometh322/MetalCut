@@ -13,12 +13,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.SITE_URL ?? "http://localhost:3000"),
   title: {
     default: "MetalCut — металлорежущий инструмент",
     template: "%s",
   },
   description:
     "Платформа продажи металлорежущего инструмента: фрезы, свёрла, метчики, резцы и оснастка от проверенных поставщиков.",
+  openGraph: {
+    type: "website",
+    locale: "ru_RU",
+    siteName: "MetalCut",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

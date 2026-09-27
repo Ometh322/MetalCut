@@ -18,7 +18,16 @@ interface Props {
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const chain = await resolveCategoryChain(slug);
-  return { title: chain ? `${chain.category.name} — MetalCut` : "Каталог — MetalCut" };
+  if (!chain) return { title: "Каталог" };
+  const { category, ancestors } = chain;
+  const path = `/catalog/${[...ancestors.map((a) => a.slug), category.slug].join("/")}`;
+  return {
+    ...(category.seoTitle ? { title: { absolute: category.seoTitle } } : { title: `${category.name} — купить с доставкой` }),
+    description:
+      category.seoDescription ??
+      `${category.name}: подбор по характеристикам, цены нескольких продавцов, наличие и сроки отгрузки. ${ancestors.map((a) => a.name).join(" / ")}.`.trim(),
+    alternates: { canonical: path },
+  };
 }
 
 export default async function CategoryPage({ params, searchParams }: Props) {
@@ -64,7 +73,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         ]}
       />
 
-      {aiQuery && <AiBanner originalQuery={aiQuery} chips={aiChips} basePath={basePath} />}
+      {aiQuery && <AiBanner originalQuery={aiQuery} chips={aiChips} />}
       <div className="mt-2 mb-4 flex flex-wrap items-baseline gap-3">
         <h1 className="text-2xl font-bold text-slate-900">{category.name}</h1>
         <span className="text-sm text-slate-500">

@@ -8,7 +8,7 @@ import { parseQuery } from "@/services/ai";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Все товары — MetalCut",
+  title: "Все товары",
 };
 
 /** /catalog — все товары / глобальный поиск (?q=…). Запрос сначала проходит AI-подбор. */

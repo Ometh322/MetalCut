@@ -26,11 +26,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    // Гидратация корзины из localStorage после монтирования (SSR-безопасно):
+    // setState в effect здесь неизбежен и выполняется один раз
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setItems(
             parsed
               .filter((i): i is CartItem => typeof i?.id === "string" && Number(i?.qty) > 0)
@@ -41,6 +44,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // повреждённая корзина — начинаем с пустой
     }
+     
     setReady(true);
   }, []);
 
@@ -106,10 +110,13 @@ export function useCartOffers() {
   useEffect(() => {
     if (!ready) return;
     if (items.length === 0) {
+      // синхронный сброс при опустевшей корзине — выполняется редко, по одному разу на случай
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setOffers([]);
       return;
     }
     let cancelled = false;
+     
     setLoading(true);
     fetch("/api/cart", {
       method: "POST",

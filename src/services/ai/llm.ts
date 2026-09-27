@@ -4,7 +4,7 @@
  * Задача модели — извлечение структурированных данных, не генерация: temperature 0,
  * короткий ответ, жёсткий таймаут. Валидация значений происходит после вызова.
  */
-import type { ParsedAttrFilter, ParsedQuery, QueryParser } from "./types";
+import type { ParsedAttrFilter, QueryParser } from "./types";
 
 export function llmConfigured(): boolean {
   return Boolean(process.env.LLM_API_BASE && process.env.LLM_API_KEY && process.env.LLM_MODEL);

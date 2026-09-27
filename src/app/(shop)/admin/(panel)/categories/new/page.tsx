@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Новая категория — MetalCut" };
+export const metadata = { title: "Новая категория" };
 
 export default async function NewCategoryPage() {
   const parents = await prisma.category.findMany({

@@ -5,7 +5,7 @@ import { listUserOrders } from "@/services/orders.service";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Мои заявки — MetalCut" };
+export const metadata = { title: "Мои заявки" };
 
 const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
   NEW: { label: "Новая", cls: "bg-blue-50 text-blue-700 border-blue-200" },

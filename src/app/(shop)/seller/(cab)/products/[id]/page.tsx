@@ -8,7 +8,7 @@ import { getLeafCategories, getSellerProduct } from "@/services/seller.service";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Редактирование товара — MetalCut" };
+export const metadata = { title: "Редактирование товара" };
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

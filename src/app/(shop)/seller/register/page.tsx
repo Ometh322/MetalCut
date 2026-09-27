@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Регистрация продавца — MetalCut" };
+export const metadata = { title: "Регистрация продавца" };
 
 export default async function SellerRegisterPage() {
   const user = await getCurrentUser();

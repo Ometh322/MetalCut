@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   return {
-    title: product ? `${product.name} — MetalCut` : "Товар — MetalCut",
+    title: product ? product.name : "Товар",
     description: product?.description?.slice(0, 160) ?? undefined,
   };
 }

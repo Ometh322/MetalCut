@@ -5,7 +5,7 @@ import { getSellerStats, listSellerOrders } from "@/services/seller.service";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Кабинет продавца — MetalCut" };
+export const metadata = { title: "Кабинет продавца" };
 
 export default async function SellerDashboardPage() {
   const { seller } = await requireSeller();

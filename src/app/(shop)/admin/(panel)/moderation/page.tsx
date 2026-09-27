@@ -8,7 +8,7 @@ import type { AttributeDef } from "@/data/nomenclature";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Модерация — MetalCut" };
+export const metadata = { title: "Модерация" };
 
 const TABS: { key: string; label: string }[] = [
   { key: "PENDING", label: "На модерации" },

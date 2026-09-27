@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MetalCut — платформа продажи металлорежущего инструмента
 
-## Getting Started
+Демо-версия B2B-маркетплейса: витрина с фасетными фильтрами (DNS-подобный UI), AI-подбор по
+естественному запросу, корзина и заказы-заявки без оплаты, кабинеты покупателя и продавца
+(включая импорт прайса CSV/Excel), админка с модерацией и редактором схем атрибутов.
 
-First, run the development server:
+Подробности — в [PLAN.md](./PLAN.md): решения, дорожная карта и журнал работы.
+
+## Стек
+
+- **Next.js 16** (App Router, server components + server actions) + TypeScript
+- **PostgreSQL + Prisma 6** — атрибуты товаров в JSONB, схемы атрибутов на категориях
+- **Tailwind CSS v4**
+- Поиск: Postgres FTS (`websearch_to_tsquery` + ILIKE); AI-подбор — rule-based парсер + подключаемый
+  LLM-слой (OpenAI-совместимый API)
+- Аутентификация: email+пароль (scrypt), сессия — JWT в httpOnly-cookie (jose)
+
+## Запуск
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+docker compose up -d db        # Postgres 16 на localhost:5433 (5432 часто занят)
+npm install
+cp .env.example .env           # пропишите AUTH_SECRET (случайная строка)
+npx prisma db push             # схема БД
+npm run db:seed                # демо-данные: 5 продавцов, ~330 товаров
+npm run dev                    # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Полезные команды: `npm run db:setup` (push+seed), `npm run db:studio` (Prisma Studio),
+`npm run build` (продакшн-сборка), `npm run lint`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+После сида рекомендуется `npx tsx prisma/spread-attrs.ts` — гарантированное покрытие
+ходовых комбинаций атрибутов для демо-запросов AI-подбора.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Демо-аккаунты
 
-## Learn More
+| Роль | Логин | Пароль |
+|---|---|---|
+| Админ | `admin@demo.ru` | `admin123` |
+| Продавец | `nordtool@demo.ru` (также exactcut/uraltool/vectorcut/stalstandart) | `seller123` |
+| Покупатель | `customer@demo.ru` | `customer123` |
 
-To learn more about Next.js, take a look at the following resources:
+## Что посмотреть
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **AI-подбор**: в поиске наберите «концевая фреза 10 мм по нержавейке» — запрос превратится в фильтры
+  категории. Другие примеры: «метчик M8», «сверло ступенчатое 6-12 мм HSS-Co», «твердосплавная пластина CNMG».
+- **Каталог**: фасетные фильтры из схем категорий со счётчиками, режимы список/сетка, сортировки, фильтр наличия.
+- **Карточка товара**: предложения продавцов, характеристики, похожие товары.
+- **Корзина и заявка**: без оплаты; заявка оформляется и без регистрации.
+- **Кабинет продавца** `/seller`: карточки с формой из схемы категории, быстрая правка цен, импорт прайса.
+- **Админка** `/admin`: модерация карточек, дерево категорий, редактор схем атрибутов, заказы, продавцы.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Переменные окружения
 
-## Deploy on Vercel
+| Переменная | Назначение |
+|---|---|
+| `DATABASE_URL` | Подключение к Postgres |
+| `AUTH_SECRET` | Секрет подписи сессионных JWT |
+| `LLM_API_BASE` / `LLM_API_KEY` / `LLM_API_MODEL` | LLM для AI-подбора (OpenAI-совместимый API). Пусто — работает rule-based парсер |
+| `SITE_URL` | Публичный URL для sitemap/canonical (по умолчанию localhost:3000) |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Структура
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+prisma/            схема БД, seed, утилиты (restore-schema, spread-attrs)
+src/app/(shop)/    витрина: каталог, товар, корзина, кабинеты (/account, /seller), админка (/admin)
+src/services/      бизнес-логика: каталог, заказы, продавец, ai/ (QueryParser)
+src/data/          номенклатура: дерево категорий и схемы атрибутов
+src/lib/           URL-состояние фильтров, валидация атрибутов, auth, статусы
+```

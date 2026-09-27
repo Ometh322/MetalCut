@@ -4,7 +4,7 @@ import { getLeafCategories } from "@/services/seller.service";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Импорт прайса — MetalCut" };
+export const metadata = { title: "Импорт прайса" };
 
 export default async function ImportPage() {
   await requireSeller();

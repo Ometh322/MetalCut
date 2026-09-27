@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { AttributeDef } from "@/data/nomenclature";
+
 import type { Availability, FilterState } from "@/lib/catalog-url";
 import {
   AVAILABILITY_LABELS,

@@ -20,6 +20,65 @@ const SYSTEM_FIELDS: { key: string; label: string; required?: boolean }[] = [
   { key: "description", label: "Описание" },
 ];
 
+export interface MappedRow {
+  name: string;
+  price: number;
+  stock?: number;
+  leadTimeDays?: number;
+  sellerSku?: string;
+  description?: string;
+  attributes: Record<string, string>;
+}
+
+/** Чистое преобразование строки файла в объект импорта по текущему маппингу */
+function mapImportRow(
+  row: string[],
+  headers: string[],
+  mapping: Record<string, string>,
+  schema: AttributeDef[],
+): MappedRow {
+  const get = (target: string) => {
+    const col = mapping[target];
+    if (!col) return "";
+    const idx = headers.indexOf(col);
+    return idx >= 0 ? (row[idx] ?? "") : "";
+  };
+  const attributes: Record<string, string> = {};
+  for (const def of schema) {
+    const v = get(`attr.${def.code}`);
+    if (v !== "") attributes[def.code] = v;
+  }
+  return {
+    name: get("name"),
+    price: Number(get("price").replace(",", ".").replace(/[^\d.]/g, "")),
+    stock: get("stock") ? Number(get("stock").replace(/[^\d-]/g, "")) || 0 : undefined,
+    leadTimeDays: get("leadTimeDays") ? Number(get("leadTimeDays").replace(/[^\d]/g, "")) || 0 : undefined,
+    sellerSku: get("sellerSku") || undefined,
+    description: get("description") || undefined,
+    attributes,
+  };
+}
+
+/** Чистая клиентская валидация строки (зеркалит серверные правила) */
+function rowIssues(r: MappedRow, schema: AttributeDef[]): string[] {
+  const issues: string[] = [];
+  if (!r.name) issues.push("нет названия");
+  if (!(r.price > 0)) issues.push("нет цены");
+  for (const def of schema) {
+    if (def.required && (r.attributes[def.code] === undefined || r.attributes[def.code] === "")) {
+      issues.push(def.label);
+    } else if (r.attributes[def.code] !== undefined) {
+      if (def.type === "enum" && def.values && !def.values.map(String).includes(r.attributes[def.code])) {
+        issues.push(`${def.label}: недопустимое «${r.attributes[def.code]}»`);
+      }
+      if (def.type === "number" && !Number.isFinite(Number(r.attributes[def.code].replace(",", ".")))) {
+        issues.push(`${def.label}: не число`);
+      }
+    }
+  }
+  return issues;
+}
+
 /**
  * CSV читаем как текст с детекцией кодировки: UTF-8 (BOM/без), CP1251 (русский Excel).
  * XLSX-бинарники — как массив байт.
@@ -53,7 +112,7 @@ export default function ImportWizard({ categories }: { categories: LeafCategoryI
 
   const [categorySlug, setCategorySlug] = useState(categories[0]?.slug ?? "");
   const category = useMemo(() => categories.find((c) => c.slug === categorySlug), [categories, categorySlug]);
-  const schema: AttributeDef[] = category?.schema ?? [];
+  const schema: AttributeDef[] = useMemo(() => category?.schema ?? [], [category]);
 
   const [mapping, setMapping] = useState<Mapping>({});
 
@@ -87,52 +146,18 @@ export default function ImportWizard({ categories }: { categories: LeafCategoryI
     setMapping(auto);
   };
 
-  const mappedRow = (row: string[]): { name: string; price: number; stock?: number; leadTimeDays?: number; sellerSku?: string; description?: string; attributes: Record<string, string> } => {
-    const get = (target: string) => {
-      const col = mapping[target];
-      if (!col) return "";
-      const idx = headers.indexOf(col);
-      return idx >= 0 ? (row[idx] ?? "") : "";
-    };
-    const attributes: Record<string, string> = {};
-    for (const def of schema) {
-      const v = get(`attr.${def.code}`);
-      if (v !== "") attributes[def.code] = v;
-    }
-    return {
-      name: get("name"),
-      price: Number(get("price").replace(",", ".").replace(/[^\d.]/g, "")),
-      stock: get("stock") ? Number(get("stock").replace(/[^\d-]/g, "")) || 0 : undefined,
-      leadTimeDays: get("leadTimeDays") ? Number(get("leadTimeDays").replace(/[^\d]/g, "")) || 0 : undefined,
-      sellerSku: get("sellerSku") || undefined,
-      description: get("description") || undefined,
-      attributes,
-    };
-  };
-
-  const preview = useMemo(() => rows.slice(0, 8).map(mappedRow), [rows, mapping, schema]);
-
-  const rowIssues = (r: ReturnType<typeof mappedRow>): string[] => {
-    const issues: string[] = [];
-    if (!r.name) issues.push("нет названия");
-    if (!(r.price > 0)) issues.push("нет цены");
-    for (const def of schema) {
-      if (def.required && (r.attributes[def.code] === undefined || r.attributes[def.code] === "")) {
-        issues.push(def.label);
-      } else if (r.attributes[def.code] !== undefined) {
-        if (def.type === "enum" && def.values && !def.values.map(String).includes(r.attributes[def.code])) {
-          issues.push(`${def.label}: недопустимое «${r.attributes[def.code]}»`);
-        }
-        if (def.type === "number" && !Number.isFinite(Number(r.attributes[def.code].replace(",", ".")))) {
-          issues.push(`${def.label}: не число`);
-        }
-      }
-    }
-    return issues;
-  };
-
-  const importRows = useMemo(() => rows.map(mappedRow), [rows, mapping, schema]);
-  const validCount = importRows.filter((r) => rowIssues(r).length === 0).length;
+  const preview = useMemo(
+    () => rows.slice(0, 8).map((r) => mapImportRow(r, headers, mapping, schema)),
+    [rows, headers, mapping, schema],
+  );
+  const importRows = useMemo(
+    () => rows.map((r) => mapImportRow(r, headers, mapping, schema)),
+    [rows, headers, mapping, schema],
+  );
+  const validCount = useMemo(
+    () => importRows.filter((r) => rowIssues(r, schema).length === 0).length,
+    [importRows, schema],
+  );
 
   const setMap = (target: string, col: string) =>
     setMapping((prev) => {
@@ -267,7 +292,7 @@ export default function ImportWizard({ categories }: { categories: LeafCategoryI
               </thead>
               <tbody>
                 {preview.map((r, i) => {
-                  const issues = rowIssues(r);
+                  const issues = rowIssues(r, schema);
                   return (
                     <tr key={i} className="border-b border-slate-100 align-top">
                       <td className="py-1.5 pr-3 text-slate-400">{i + 1}</td>

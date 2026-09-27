@@ -5,7 +5,7 @@ import type { AttributeDef } from "@/data/nomenclature";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Категории — MetalCut" };
+export const metadata = { title: "Категории" };
 
 export default async function AdminCategoriesPage() {
   const all = await prisma.category.findMany({

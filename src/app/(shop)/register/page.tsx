@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Регистрация — MetalCut" };
+export const metadata = { title: "Регистрация" };
 
 export default async function RegisterPage({
   searchParams,

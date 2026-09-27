@@ -21,11 +21,10 @@ export default function CheckoutForm({
   const [state, formAction, pending] = useActionState(createOrderAction, initial);
   const clearedFor = useRef<string | null>(null);
 
-  const byId = new Map(offers.map((o) => [o.id, o]));
-  const rows = useMemo(
-    () => items.map((i) => ({ qty: i.qty, offer: byId.get(i.id)! })).filter((r) => r.offer),
-    [items, offers],
-  );
+  const rows = useMemo(() => {
+    const byId = new Map(offers.map((o) => [o.id, o]));
+    return items.map((i) => ({ qty: i.qty, offer: byId.get(i.id)! })).filter((r) => r.offer);
+  }, [items, offers]);
   const total = rows.reduce((s, r) => s + r.offer.price * r.qty, 0);
 
   // Успех: чистим корзину и уходим на страницу подтверждения

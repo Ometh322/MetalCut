@@ -4,7 +4,7 @@ import { fmtPrice } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Админка — MetalCut" };
+export const metadata = { title: "Админка" };
 
 export default async function AdminDashboardPage() {
   const [pendingProducts, approvedProducts, activeSellers, pendingSellers, orders, revenue] = await Promise.all([

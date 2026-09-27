@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useCart, useCartOffers } from "@/components/cart/CartProvider";
 import { fmtPrice, plural } from "@/lib/format";
 
@@ -9,20 +9,15 @@ export default function CartPage() {
   const { items, ready, setQty, remove } = useCart();
   const { offers, loading } = useCartOffers();
 
-  // Позиции, пропавшие с продажи, убираем из корзины с уведомлением
+  // Позиции, пропавшие с продажи: показываем уведомление, удаляем по клику
   const dropped = useMemo(
     () => items.filter((i) => offers.length > 0 && !offers.some((o) => o.id === i.id)),
     [items, offers],
   );
-  useEffect(() => {
-    if (!loading && dropped.length) dropped.forEach((d) => remove(d.id));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, dropped.length]);
-
-  const byId = new Map(offers.map((o) => [o.id, o]));
 
   // Группировка по продавцу
   const groups = useMemo(() => {
+    const byId = new Map(offers.map((o) => [o.id, o]));
     const map = new Map<string, { sellerName: string; rows: { offer: (typeof offers)[number]; qty: number }[] }>();
     for (const item of items) {
       const offer = byId.get(item.id);
@@ -66,8 +61,16 @@ export default function CartPage() {
       </h1>
 
       {dropped.length > 0 && (
-        <div className="mb-4 text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-md px-4 py-2">
-          {dropped.length} {plural(dropped.length, ["позиция удалена", "позиции удалены", "позиций удалены"])} — предложение продавца больше неактуально.
+        <div className="mb-4 text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-md px-4 py-2 flex flex-wrap items-center gap-3">
+          <span>
+            {dropped.length} {plural(dropped.length, ["позиция больше", "позиции больше", "позиций больше"])} не продаётся — предложение продавца неактуально.
+          </span>
+          <button
+            onClick={() => dropped.forEach((d) => remove(d.id))}
+            className="text-amber-900 underline hover:text-amber-950"
+          >
+            Убрать из корзины
+          </button>
         </div>
       )}
 

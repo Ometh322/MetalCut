@@ -71,7 +71,7 @@ const SHAPE_HINTS: [RegExp, string][] = [
 const norm = (s: string) => s.toLowerCase().replace(/ё/g, "е").replace(/\s+/g, " ").trim();
 
 export function parseByRules(query: string): ParsedQuery | null {
-  let text = " " + query.toLowerCase() + " ";
+  const text = " " + query.toLowerCase() + " ";
   const attrs: ParsedAttrFilter[] = [];
   const consumed: string[] = [];
 
