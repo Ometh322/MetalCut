@@ -167,6 +167,42 @@ export default function ImportWizard({ categories }: { categories: LeafCategoryI
       return next;
     });
 
+  /** Шаблон CSV под выбранную категорию: заголовки = колонки маппинга + примеры строк */
+  const downloadTemplate = () => {
+    if (!category) return;
+    const headers = ["Название", "Цена", "Остаток", "Срок поставки, дн.", "Артикул продавца", ...category.schema.map((d) => d.label)];
+    const exampleAttr = (def: AttributeDef): string => {
+      if (def.values?.length) return String(def.values[0]);
+      if (def.code === "diameter") return "10";
+      if (def.type === "number") return "1";
+      return def.code === "gost" ? "ГОСТ 17026-71" : "";
+    };
+    const esc = (v: string) => (/[;"\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+    const row1 = [
+      esc(`Пример: ${category.name}`),
+      "1500",
+      "25",
+      "0",
+      "EX-0001",
+      ...category.schema.map((d) => esc(exampleAttr(d))),
+    ];
+    const row2 = [
+      esc(`Пример 2: ${category.name}`),
+      "2100",
+      "0",
+      "5",
+      "EX-0002",
+      ...category.schema.map((d) => esc(exampleAttr(d))),
+    ];
+    const csv = "\uFEFF" + [headers.map(esc).join(";"), row1.join(";"), row2.join(";")].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `шаблон-импорта-${category.slug}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
   const colSelect = (target: string, label: string, required?: boolean) => (
     <label className="block">
       <span className="text-sm font-medium text-slate-700">
@@ -193,7 +229,7 @@ export default function ImportWizard({ categories }: { categories: LeafCategoryI
     const updated = state.results.filter((r) => r.status === "updated").length;
     const errors = state.results.filter((r) => r.status === "error");
     return (
-      <div className="max-w-3xl">
+      <div className="w-full">
         <h2 className="text-lg font-bold text-slate-900">Импорт завершён</h2>
         <div className="mt-2 flex gap-4 text-sm">
           <span className="text-emerald-700 font-medium">Создано: {created}</span>
@@ -223,12 +259,12 @@ export default function ImportWizard({ categories }: { categories: LeafCategoryI
   }
 
   return (
-    <div className="max-w-4xl space-y-4">
+    <div className="w-full space-y-4">
       {/* Шаг 1: файл */}
       <section className="bg-white border border-slate-200 rounded-lg p-5">
         <h2 className="font-semibold text-slate-900">1. Файл прайса</h2>
         <p className="text-sm text-slate-500 mt-1">CSV или Excel (xlsx/xls), до 500 строк. Первая строка — заголовки колонок.</p>
-        <div className="mt-3 flex items-center gap-3">
+        <div className="mt-3 flex flex-wrap items-center gap-3">
           <input
             ref={fileInput}
             type="file"
@@ -238,6 +274,9 @@ export default function ImportWizard({ categories }: { categories: LeafCategoryI
           />
           {fileName && <span className="text-sm text-emerald-700">✓ {fileName} ({rows.length} строк)</span>}
         </div>
+        <p className="mt-2 text-xs text-slate-400">
+          Нет готового файла? Скачайте шаблон под нужную категорию на шаге 2 — заполните и загрузите обратно.
+        </p>
         {headers.length > 0 && (
           <div className="mt-3 text-xs text-slate-500">
             Колонки файла: {headers.map((h) => `"${h}"`).join(", ")}
@@ -263,6 +302,19 @@ export default function ImportWizard({ categories }: { categories: LeafCategoryI
               ))}
             </select>
           </label>
+
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <button
+              onClick={downloadTemplate}
+              className="text-sm border border-slate-300 hover:border-orange-400 hover:text-orange-700 rounded-md px-3 py-1.5 text-slate-700 transition-colors"
+              title="CSV с заголовками и примерами строк под выбранную категорию"
+            >
+              ⬇ Скачать шаблон CSV для «{category?.name ?? ""}»
+            </button>
+            <span className="text-xs text-slate-400">
+              Заголовки шаблона совпадают с характеристиками категории — автоподбор сопоставит колонки сам. Разделитель «;», UTF-8.
+            </span>
+          </div>
 
           <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {SYSTEM_FIELDS.map((f) => colSelect(f.key, f.label, f.required))}

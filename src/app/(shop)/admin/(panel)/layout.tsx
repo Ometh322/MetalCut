@@ -16,7 +16,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   await requireAdmin();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 mt-4">
+    <div className="w-full px-4 xl:px-8 mt-4">
       <div className="flex items-baseline justify-between border-b border-slate-200 pb-3">
         <h1 className="text-2xl font-bold text-slate-900">Админка MetalCut</h1>
         <span className="text-sm text-slate-500">demo-режим</span>

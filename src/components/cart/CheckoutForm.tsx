@@ -37,12 +37,12 @@ export default function CheckoutForm({
   }, [state, clear, router]);
 
   if (!ready || loading) {
-    return <div className="max-w-4xl mx-auto px-4 mt-8 text-slate-500">Загрузка…</div>;
+    return <div className="w-full px-4 xl:px-8 mt-8 text-slate-500">Загрузка…</div>;
   }
 
   if (items.length === 0 && !state.ok) {
     return (
-      <div className="max-w-4xl mx-auto px-4 mt-8">
+      <div className="w-full px-4 xl:px-8 mt-8">
         <h1 className="text-2xl font-bold text-slate-900">Оформление заявки</h1>
         <div className="mt-6 bg-white border border-slate-200 rounded-lg py-16 text-center">
           <div className="text-slate-500">Корзина пуста — оформлять нечего</div>
@@ -58,7 +58,7 @@ export default function CheckoutForm({
     "w-full border border-slate-300 rounded-md px-3 py-2 text-sm outline-none focus:border-orange-500";
 
   return (
-    <div className="max-w-4xl mx-auto px-4 mt-4">
+    <div className="w-full px-4 xl:px-8 mt-4">
       <h1 className="text-2xl font-bold text-slate-900 mb-4">Оформление заявки</h1>
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-6 items-start">

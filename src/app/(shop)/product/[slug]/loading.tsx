@@ -1,7 +1,7 @@
 /** Скелетон карточки товара */
 export default function ProductLoading() {
   return (
-    <div className="max-w-7xl mx-auto px-4 mt-4">
+    <div className="w-full px-4 xl:px-8 mt-4">
       <div className="h-4 w-72 bg-slate-200 rounded animate-pulse" />
       <div className="mt-3 grid lg:grid-cols-[380px_1fr] gap-8 items-start">
         <div className="w-full aspect-square bg-slate-100 rounded-lg animate-pulse" />

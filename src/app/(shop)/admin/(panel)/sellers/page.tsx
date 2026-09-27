@@ -20,7 +20,7 @@ export default async function AdminSellersPage() {
   });
 
   return (
-    <div className="max-w-5xl mx-auto px-4 mt-4">
+    <div className="w-full px-4 xl:px-8 mt-4">
       <h1 className="text-2xl font-bold text-slate-900">Продавцы</h1>
       <p className="text-sm text-slate-500 mt-1">
         Модерация заявок продавцов. Полная админка (категории, карточки, заказы) — следующий этап.

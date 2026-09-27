@@ -78,9 +78,10 @@ export async function requireUser(next?: string): Promise<SessionUser> {
   return user;
 }
 
-/** Guard кабинета продавца: пользователь с ролью SELLER/ADMIN и привязанным продавцом */
+/** Guard кабинета продавца: пользователь с ролью SELLER и привязанным продавцом */
 export async function requireSeller(): Promise<{ user: SessionUser; seller: Seller }> {
   const user = await requireUser("/seller");
+  if (user.role === "ADMIN") redirect("/admin");
   if (user.role === "CUSTOMER") redirect("/");
   const seller = await prisma.seller.findUnique({ where: { userId: user.id } });
   if (!seller) redirect("/seller/register");

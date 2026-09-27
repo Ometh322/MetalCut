@@ -51,7 +51,7 @@ export default async function CatalogPage({
   const title = q ? `Результаты поиска` : "Все товары";
 
   return (
-    <div className="max-w-7xl mx-auto px-4 mt-4">
+    <div className="w-full px-4 xl:px-8 mt-4">
       <Breadcrumbs items={[{ href: "/", label: "Главная" }, { label: "Каталог" }]} />
       <h1 className="text-2xl font-bold text-slate-900 mt-2 mb-4">
         {title}

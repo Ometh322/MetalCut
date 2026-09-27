@@ -10,7 +10,8 @@ export const metadata = { title: "Регистрация продавца" };
 export default async function SellerRegisterPage() {
   const user = await getCurrentUser();
   if (user) {
-    redirect(user.role === "CUSTOMER" ? "/" : "/seller");
+    if (user.role === "ADMIN") redirect("/admin");
+    redirect(user.role === "SELLER" ? "/seller" : "/");
   }
 
   return (

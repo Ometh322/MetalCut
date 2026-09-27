@@ -9,7 +9,7 @@ export default async function HomePage() {
   const { productCount, sellerCount, tree, latest } = await getHomeData();
 
   return (
-    <div className="max-w-7xl mx-auto px-4">
+    <div className="w-full px-4 xl:px-8">
       {/* Hero с поиском */}
       <section className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl mt-4 px-6 py-10 md:px-10 md:py-14 text-white">
         <h1 className="text-2xl md:text-4xl font-bold max-w-3xl leading-tight">

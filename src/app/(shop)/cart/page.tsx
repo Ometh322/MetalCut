@@ -37,12 +37,12 @@ export default function CartPage() {
   const totalQty = items.reduce((s, i) => s + i.qty, 0);
 
   if (!ready || loading) {
-    return <div className="max-w-5xl mx-auto px-4 mt-8 text-slate-500">Загрузка корзины…</div>;
+    return <div className="w-full px-4 xl:px-8 mt-8 text-slate-500">Загрузка корзины…</div>;
   }
 
   if (items.length === 0) {
     return (
-      <div className="max-w-5xl mx-auto px-4 mt-8">
+      <div className="w-full px-4 xl:px-8 mt-8">
         <h1 className="text-2xl font-bold text-slate-900">Корзина</h1>
         <div className="mt-6 bg-white border border-slate-200 rounded-lg py-16 text-center">
           <div className="text-slate-500">Корзина пуста</div>
@@ -55,7 +55,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 mt-4">
+    <div className="w-full px-4 xl:px-8 mt-4">
       <h1 className="text-2xl font-bold text-slate-900 mb-4">
         Корзина <span className="text-base font-normal text-slate-500">{totalQty} {plural(totalQty, ["позиция", "позиции", "позиций"])}</span>
       </h1>

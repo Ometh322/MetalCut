@@ -63,7 +63,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 mt-4">
+    <div className="w-full px-4 xl:px-8 mt-4">
       <Breadcrumbs
         items={[
           { href: "/", label: "Главная" },
